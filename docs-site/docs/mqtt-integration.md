@@ -98,6 +98,8 @@ Add these options under the `mqtt` key in your `config.json`:
 | `statusTopic` | `string` | `"status"` | Topic name for status messages (outbound) |
 | `commandTopic` | `string` | `""` | Topic name for receiving commands (inbound). Leave empty or omit to disable command reception (status publishing only). Set to `"command"` to enable. |
 | `statusCheckInterval` | `number` | `10000` | Polling fallback interval in milliseconds |
+| `notificationTopic` | `string` | `"notification"` | Publishes every Teams notification as JSON; set to an empty string to disable |
+| `keepAvailableTopic` | `string` | `"keep-available"` | Retained state topic for the Home Assistant keep-available switch |
 | `mediaTopics` | `object` | see [Media Topics](#media-topics) | Custom topic names for media state topics |
 
 ### Topic Structure
@@ -107,6 +109,10 @@ Add these options under the `mqtt` key in your `config.json`:
 
 **Command Reception (Inbound)**: `{topicPrefix}/{commandTopic}`
 - Example: `teams/command`
+
+**Notifications (Outbound)**: `{topicPrefix}/{notificationTopic}`
+- Example payload: `{"title":"New message","body":"…","timestamp":"2026-08-12T12:00:00.000Z"}`
+- Notification payloads are not retained. Titles and bodies can contain personal or confidential information, so secure the broker and restrict topic access.
 
 ### Media Topics
 
@@ -492,6 +498,7 @@ All entities are grouped under a single HA device (identified by `mqtt.clientId`
 | HA Component | Entity | State Topic | Description |
 |-------------|--------|-------------|-------------|
 | `sensor` | Teams Status | `{topicPrefix}/{statusTopic}` | Presence status (available, busy, dnd, away, brb) |
+| `sensor` | Teams Last Notification | `{topicPrefix}/{notificationTopic}` | Latest notification title, with body and timestamp exposed as attributes |
 | `sensor` | Teams Microphone | `{topicPrefix}/microphone` | Microphone state (speaking, silent, muted, off) |
 | `binary_sensor` | Teams In Call | `{topicPrefix}/in-call` | Whether you are in an active call |
 | `binary_sensor` | Teams Incoming Call | `{topicPrefix}/incoming-call` | Whether a call is ringing |
@@ -501,8 +508,11 @@ All entities are grouped under a single HA device (identified by `mqtt.clientId`
 | `button` | Teams Toggle Mute | via `commandTopic` | Sends `{"action":"toggle-mute"}` |
 | `button` | Teams Toggle Video | via `commandTopic` | Sends `{"action":"toggle-video"}` |
 | `button` | Teams Toggle Hand Raise | via `commandTopic` | Sends `{"action":"toggle-hand-raise"}` |
+| `switch` | Teams Keep Available | via `commandTopic` | Forces idle detection to report active while on, preventing automatic Away status |
 
 Button entities are only created when `commandTopic` is set (bidirectional mode). Discovery configs are republished on every broker reconnect so entities survive broker restarts.
+
+The **Teams Keep Available** switch affects automatic idle detection only. It does not override a presence state you select manually in Teams, and it resets to off whenever Teams for Linux restarts. Turning it off immediately restores normal system-idle detection.
 
 ### Example Automation
 

@@ -15,6 +15,7 @@ class IdleMonitor {
   #idleTimeUserStatus = -1;
   #stateFilePath;
   #lastStateFileOverride = null;
+  #forceActive = false;
 
   constructor(config, getUserStatus) {
     this.#config = config;
@@ -33,6 +34,12 @@ class IdleMonitor {
     // those signals to app.quit(), and a hard exit skips Chromium's storage
     // flush, losing recently written settings and cookies (#2722).
     process.on('exit', this.#cleanupStateFile.bind(this));
+  }
+
+  setForceActive(enabled) {
+    this.#forceActive = enabled === true;
+    this.#idleTimeUserStatus = -1;
+    console.info(`[IDLE] MQTT keep-available override ${this.#forceActive ? 'enabled' : 'disabled'}`);
   }
 
   #cleanupStateFile() {
@@ -106,6 +113,10 @@ class IdleMonitor {
   }
 
   async #handleGetSystemIdleState() {
+
+    if (this.#forceActive) {
+      return { system: IdleMonitor.#SYSTEM_STATE_ACTIVE, userIdle: -1, userCurrent: this.#getUserStatus() };
+    }
 
     // If forceState is enabled, check state file for override
     if (this.#config.idleDetection?.forceState) {

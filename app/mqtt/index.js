@@ -30,7 +30,7 @@ class MQTTClient extends EventEmitter {
 			'toggle-hand-raise': 'Ctrl+Shift+K'
 		};
 
-		this.nonShortcutActions = ['get-calendar'];
+		this.nonShortcutActions = ['get-calendar', 'set-keep-available'];
 	}
 
 	get allowedActions() {
