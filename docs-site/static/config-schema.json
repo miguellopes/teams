@@ -878,6 +878,8 @@
         "statusTopic": "status",
         "commandTopic": "",
         "statusCheckInterval": 10000,
+        "notificationTopic": "notification",
+        "keepAvailableTopic": "keep-available",
         "homeAssistant": {
           "enabled": false,
           "discoveryPrefix": "homeassistant",
@@ -957,6 +959,18 @@
           "type": "number",
           "default": 10000,
           "description": "Polling interval in milliseconds for the status detection fallback."
+        },
+        {
+          "path": "notificationTopic",
+          "type": "string",
+          "default": "notification",
+          "description": "Topic name for outbound notification details; leave empty to disable publishing notifications."
+        },
+        {
+          "path": "keepAvailableTopic",
+          "type": "string",
+          "default": "keep-available",
+          "description": "Topic name for the retained Home Assistant keep-available switch state."
         },
         {
           "path": "homeAssistant.enabled",

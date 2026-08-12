@@ -59,6 +59,13 @@ describe('MQTT handleCommand - valid commands', () => {
 		assert.strictEqual(emitted.shortcut, undefined);
 	});
 
+	it('emits set-keep-available commands for Home Assistant', () => {
+		const emitted = fireAndCapture({ action: 'set-keep-available', enabled: true });
+		assert.strictEqual(emitted.action, 'set-keep-available');
+		assert.strictEqual(emitted.enabled, true);
+		assert.strictEqual(emitted.shortcut, undefined);
+	});
+
 	it('preserves extra fields from command payload', () => {
 		const emitted = fireAndCapture({ action: 'toggle-mute', requestId: '123' });
 		assert.strictEqual(emitted.requestId, '123');

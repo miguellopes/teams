@@ -116,9 +116,34 @@ class HomeAssistantDiscovery {
 		};
 	}
 
+	#buildKeepAvailableSwitchConfig() {
+		if (!this.#commandTopic) return null;
+		return {
+			name: 'Teams Keep Available', unique_id: `${this.#deviceId}_keep_available`,
+			state_topic: `${this.#topicPrefix}/${this.#mqttConfig.keepAvailableTopic || 'keep-available'}`,
+			command_topic: this.#commandTopic,
+			payload_on: JSON.stringify({action: 'set-keep-available', enabled: true}),
+			payload_off: JSON.stringify({action: 'set-keep-available', enabled: false}),
+			state_on: 'ON', state_off: 'OFF', icon: 'mdi:account-clock',
+			availability: this.#getAvailability(), device: this.#getDevice(),
+		};
+	}
+
+	#buildNotificationSensorConfig() {
+		if (!this.#mqttConfig.notificationTopic) return null;
+		const topic = `${this.#topicPrefix}/${this.#mqttConfig.notificationTopic}`;
+		return {
+			name: 'Teams Last Notification', unique_id: `${this.#deviceId}_last_notification`,
+			state_topic: topic, value_template: '{{ value_json.title }}', json_attributes_topic: topic,
+			icon: 'mdi:message-badge', availability: this.#getAvailability(), device: this.#getDevice(),
+		};
+	}
+
 	async publishDiscovery() {
 		const entities = [
 			{component: 'sensor', objectId: 'status', config: this.#buildSensorConfig()},
+			{component: 'sensor', objectId: 'last_notification', config: this.#buildNotificationSensorConfig()},
+			{component: 'switch', objectId: 'keep_available', config: this.#buildKeepAvailableSwitchConfig()},
 			{component: 'sensor', objectId: 'microphone', config: this.#buildMicrophoneSensorConfig()},
 			{
 				component: 'binary_sensor',

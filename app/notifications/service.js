@@ -13,12 +13,14 @@ class NotificationService {
   #mainWindow;
   #getUserStatus;
   #notificationSounds;
+  #mqttPublisher;
 
-  constructor(soundPlayer, config, mainWindow, getUserStatus) {
+  constructor(soundPlayer, config, mainWindow, getUserStatus, mqttPublisher = null) {
     this.#soundPlayer = soundPlayer;
     this.#config = config;
     this.#mainWindow = mainWindow;
     this.#getUserStatus = getUserStatus;
+    this.#mqttPublisher = mqttPublisher;
 
     this.#notificationSounds = [
       {
@@ -128,6 +130,12 @@ class NotificationService {
   }
 
   async #playNotificationSound(options) {
+    if (this.#mqttPublisher && this.#config.mqtt?.notificationTopic) {
+      await this.#mqttPublisher(this.#config.mqtt.notificationTopic, {
+        title: options.title || '', body: options.body || '', timestamp: new Date().toISOString()
+      }, { retain: false });
+    }
+
     // options can carry the notification title and body (the web path forwards
     // them over play-notification-sound), so log only the sound-relevant fields.
     console.debug(
