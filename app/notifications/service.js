@@ -67,10 +67,16 @@ class NotificationService {
     });
 
     try {
-      // Play notification sound if configured (await to catch any errors)
+      // Play notification sound if configured (await to catch any errors).
+      // Forward title/body so the MQTT notification publish carries them: for
+      // notificationMethod "electron" this is the only path that reaches the
+      // main process (the renderer skips play-notification-sound), so without
+      // these the notification topic would always publish empty title/body.
       await this.#playNotificationSound({
         type: options.type,
         audio: "default",
+        title: options.title,
+        body: options.body,
       });
 
       const notificationConfig = {
