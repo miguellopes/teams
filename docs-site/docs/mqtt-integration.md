@@ -524,6 +524,8 @@ Button, switch, and select entities are only created when `commandTopic` is set 
 
 The **Teams Keep Available** switch affects automatic idle detection only. It does not override a presence state you select manually in Teams, and it resets to off whenever Teams for Linux restarts. Turning it off immediately restores normal system-idle detection.
 
+The **Teams Keep Available** switch affects automatic idle detection only. It does not override a presence state you select manually in Teams, and it resets to off whenever Teams for Linux restarts. Turning it off immediately restores normal system-idle detection.
+
 ### Example Automation
 
 ```yaml
