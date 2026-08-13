@@ -30,7 +30,8 @@ class MQTTClient extends EventEmitter {
 			'toggle-hand-raise': 'Ctrl+Shift+K'
 		};
 
-		this.nonShortcutActions = ['get-calendar', 'set-keep-available'];
+		this.nonShortcutActions = ['get-calendar', 'set-keep-available', 'set-status'];
+		this.settableStatuses = new Set(['available', 'busy', 'do_not_disturb', 'away', 'be_right_back']);
 	}
 
 	get allowedActions() {
@@ -228,6 +229,11 @@ class MQTTClient extends EventEmitter {
 
 			if (!this.allowedActions.includes(command.action)) {
 				console.warn(`[MQTT] Invalid command: action '${command.action}' not in whitelist`);
+				return;
+			}
+
+			if (command.action === 'set-status' && !this.settableStatuses.has(command.status)) {
+				console.warn(`[MQTT] Invalid set-status value: '${command.status}'`);
 				return;
 			}
 

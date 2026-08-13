@@ -45,6 +45,7 @@ const allowedChannels = new Set([
   'notification-show-toast',
   'notification-toast-click',
   'user-status-changed',
+  'set-presence-status',
   'set-badge-count',
   'tray-update',
   'dock-icon-update',

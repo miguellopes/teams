@@ -203,6 +203,7 @@ Send commands as JSON messages to the command topic (`teams/command` by default)
 | `unmute` | Ctrl+Shift+M | Unmute the microphone (state-aware, see below) |
 | `toggle-video` | Ctrl+Shift+O | Toggle video on/off |
 | `toggle-hand-raise` | Ctrl+Shift+K | Toggle hand raise in meeting |
+| `set-status` | — | Set presence; requires a `status` value of `available`, `busy`, `do_not_disturb`, `away`, or `be_right_back` |
 
 ### State-Aware Mute and Unmute
 
@@ -219,6 +220,14 @@ Teams only exposes a mute *toggle* shortcut, so `mute` and `unmute` work by trac
 ```
 
 ### Sending Commands
+
+Set an explicit Teams presence status:
+
+```bash
+mosquitto_pub -h localhost -t "teams/command" -m '{"action":"set-status","status":"do_not_disturb"}' -q 1
+```
+
+Status changes use Teams' presence menu and therefore require the Teams UI to be signed in and fully loaded. Microsoft can change the menu's internal selectors; if that happens, the command is safely ignored and a warning is logged.
 
 #### Using mosquitto_pub
 
@@ -509,8 +518,11 @@ All entities are grouped under a single HA device (identified by `mqtt.clientId`
 | `button` | Teams Toggle Video | via `commandTopic` | Sends `{"action":"toggle-video"}` |
 | `button` | Teams Toggle Hand Raise | via `commandTopic` | Sends `{"action":"toggle-hand-raise"}` |
 | `switch` | Teams Keep Available | via `commandTopic` | Forces idle detection to report active while on, preventing automatic Away status |
+| `select` | Teams Set Status | via `commandTopic` | Selects Available, Busy, Do Not Disturb, Away, or Be Right Back |
 
-Button entities are only created when `commandTopic` is set (bidirectional mode). Discovery configs are republished on every broker reconnect so entities survive broker restarts.
+Button, switch, and select entities are only created when `commandTopic` is set (bidirectional mode). Discovery configs are republished on every broker reconnect so entities survive broker restarts.
+
+The **Teams Keep Available** switch affects automatic idle detection only. It does not override a presence state you select manually in Teams, and it resets to off whenever Teams for Linux restarts. Turning it off immediately restores normal system-idle detection.
 
 The **Teams Keep Available** switch affects automatic idle detection only. It does not override a presence state you select manually in Teams, and it resets to off whenever Teams for Linux restarts. Turning it off immediately restores normal system-idle detection.
 

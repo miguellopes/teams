@@ -56,6 +56,10 @@ function setEventHandlers(self) {
   self.ipcRenderer.on("enable-wakelock", () => wakeLock.enable());
   self.ipcRenderer.on("disable-wakelock", () => wakeLock.disable());
 
+  self.ipcRenderer.on('set-presence-status', (_event, status) => {
+    activityHub.setPresenceStatus(status);
+  });
+
   self.ipcRenderer.on('incoming-call-action', (event, action) => {
     const actionWrapper = document.querySelector('[data-testid="calling-actions"],[data-testid="msn-actions"]');
     if (actionWrapper) {

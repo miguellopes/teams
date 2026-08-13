@@ -66,6 +66,13 @@ describe('MQTT handleCommand - valid commands', () => {
 		assert.strictEqual(emitted.shortcut, undefined);
 	});
 
+	it('emits set-status commands for supported presence values', () => {
+		for (const status of ['available', 'busy', 'do_not_disturb', 'away', 'be_right_back']) {
+			const emitted = fireAndCapture({ action: 'set-status', status });
+			assert.strictEqual(emitted.status, status);
+		}
+	});
+
 	it('preserves extra fields from command payload', () => {
 		const emitted = fireAndCapture({ action: 'toggle-mute', requestId: '123' });
 		assert.strictEqual(emitted.requestId, '123');
@@ -129,6 +136,12 @@ describe('MQTT handleCommand - invalid commands', () => {
 
 	it('rejects empty message', () => {
 		assert.strictEqual(fireAndCapture(''), null);
+	});
+
+	it('rejects invalid or missing set-status values', () => {
+		assert.strictEqual(fireAndCapture({ action: 'set-status', status: 'offline' }), null);
+		assert.strictEqual(fireAndCapture({ action: 'set-status' }), null);
+		assert.strictEqual(fireAndCapture({ action: 'set-status', status: 1 }), null);
 	});
 });
 
