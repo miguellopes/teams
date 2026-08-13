@@ -158,11 +158,12 @@ class ActivityHub {
     meControl.click();
     await new Promise((resolve) => setTimeout(resolve, 250));
 
-    const currentPresence = document.querySelector('[data-tid="me-control-presence-menu-item"], [data-tid="presence-status-menu-item"]');
+    const currentPresence = document.querySelector('[data-tid="me-control-presence"], [data-tid="me-control-presence-menu-item"], [data-tid="presence-status-menu-item"]');
     currentPresence?.click();
     if (currentPresence) await new Promise((resolve) => setTimeout(resolve, 250));
 
     const selectors = ids.flatMap((id) => [
+      `[data-tid="${id}"]`,
       `[data-tid="presence-menu-${id}"]`,
       `[data-tid="presence-status-${id}"]`,
       `[data-tid*="${id}" i][role="menuitem"]`,
