@@ -803,6 +803,8 @@ module.exports = {
           statusTopic: "status",
           commandTopic: "",
           statusCheckInterval: 10000,
+          notificationTopic: "notification",
+          keepAvailableTopic: "keep-available",
           homeAssistant: {
             enabled: false,
             discoveryPrefix: "homeassistant",
@@ -866,6 +868,14 @@ module.exports = {
             type: "number",
             describe:
               "Polling interval in milliseconds for the status detection fallback.",
+          },
+          "notificationTopic": {
+            type: "string",
+            describe: "Topic name for outbound notification details; leave empty to disable publishing notifications.",
+          },
+          "keepAvailableTopic": {
+            type: "string",
+            describe: "Topic name for the retained Home Assistant keep-available switch state.",
           },
           "homeAssistant.enabled": {
             type: "boolean",

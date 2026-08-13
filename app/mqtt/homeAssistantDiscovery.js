@@ -8,6 +8,7 @@
  * - sensor:        Teams presence status (plain text), Microphone state
  * - binary_sensor: In-Call, Incoming Call, Meeting Started, Screen Sharing, Camera
  * - button:        Toggle Mute, Toggle Video, Toggle Hand Raise (requires commandTopic)
+ * - switch/select: Keep Available and explicit presence status (requires commandTopic)
  *
  * Buttons use payload_press with the pre-built JSON command.
  *
@@ -116,9 +117,51 @@ class HomeAssistantDiscovery {
 		};
 	}
 
+	#buildKeepAvailableSwitchConfig() {
+		if (!this.#commandTopic) return null;
+		return {
+			name: 'Teams Keep Available', unique_id: `${this.#deviceId}_keep_available`,
+			state_topic: `${this.#topicPrefix}/${this.#mqttConfig.keepAvailableTopic || 'keep-available'}`,
+			command_topic: this.#commandTopic,
+			payload_on: JSON.stringify({action: 'set-keep-available', enabled: true}),
+			payload_off: JSON.stringify({action: 'set-keep-available', enabled: false}),
+			state_on: 'ON', state_off: 'OFF', icon: 'mdi:account-clock',
+			availability: this.#getAvailability(), device: this.#getDevice(),
+		};
+	}
+
+	#buildNotificationSensorConfig() {
+		if (!this.#mqttConfig.notificationTopic) return null;
+		const topic = `${this.#topicPrefix}/${this.#mqttConfig.notificationTopic}`;
+		return {
+			name: 'Teams Last Notification', unique_id: `${this.#deviceId}_last_notification`,
+			state_topic: topic, value_template: '{{ value_json.title }}', json_attributes_topic: topic,
+			icon: 'mdi:message-badge', availability: this.#getAvailability(), device: this.#getDevice(),
+		};
+	}
+
+	#buildStatusSelectConfig() {
+		if (!this.#commandTopic) return null;
+		return {
+			name: 'Teams Set Status',
+			unique_id: `${this.#deviceId}_set_status`,
+			state_topic: `${this.#topicPrefix}/${this.#mqttConfig.statusTopic}`,
+			value_template: '{{ value_json.status }}',
+			command_topic: this.#commandTopic,
+			command_template: '{"action":"set-status","status":"{{ value }}"}',
+			options: ['available', 'busy', 'do_not_disturb', 'away', 'be_right_back'],
+			icon: 'mdi:account-switch',
+			availability: this.#getAvailability(),
+			device: this.#getDevice(),
+		};
+	}
+
 	async publishDiscovery() {
 		const entities = [
 			{component: 'sensor', objectId: 'status', config: this.#buildSensorConfig()},
+			{component: 'sensor', objectId: 'last_notification', config: this.#buildNotificationSensorConfig()},
+			{component: 'switch', objectId: 'keep_available', config: this.#buildKeepAvailableSwitchConfig()},
+			{component: 'select', objectId: 'set_status', config: this.#buildStatusSelectConfig()},
 			{component: 'sensor', objectId: 'microphone', config: this.#buildMicrophoneSensorConfig()},
 			{
 				component: 'binary_sensor',

@@ -134,6 +134,49 @@ class ActivityHub {
     }
   }
 
+  /**
+   * Select a presence value through Teams' own presence menu. Unlike the idle
+   * tracker this supports explicit Busy, DND and BRB states as well as
+   * Available/Away. The data-tid selectors are locale independent.
+   */
+  async setPresenceStatus(status) {
+    const statusIds = {
+      available: ['available', 'presence-available'],
+      busy: ['busy', 'presence-busy'],
+      do_not_disturb: ['do-not-disturb', 'dnd', 'presence-dnd'],
+      away: ['away', 'presence-away'],
+      be_right_back: ['be-right-back', 'brb', 'presence-berightback'],
+    };
+    const ids = statusIds[status];
+    if (!ids) return false;
+
+    const meControl = document.querySelector('[data-tid="me-control-avatar-trigger"], [data-tid="me-control-button"], button[id*="personButton"]');
+    if (!meControl) {
+      console.warn(`[MQTT] Cannot set presence '${status}': profile control not found`);
+      return false;
+    }
+    meControl.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    const currentPresence = document.querySelector('[data-tid="me-control-presence-menu-item"], [data-tid="presence-status-menu-item"]');
+    currentPresence?.click();
+    if (currentPresence) await new Promise((resolve) => setTimeout(resolve, 250));
+
+    const selectors = ids.flatMap((id) => [
+      `[data-tid="presence-menu-${id}"]`,
+      `[data-tid="presence-status-${id}"]`,
+      `[data-tid*="${id}" i][role="menuitem"]`,
+    ]);
+    const option = document.querySelector(selectors.join(', '));
+    if (!option) {
+      console.warn(`[MQTT] Cannot set presence '${status}': menu option not found`);
+      return false;
+    }
+    option.click();
+    console.info(`[MQTT] Selected Teams presence '${status}'`);
+    return true;
+  }
+
   refreshAppState(controller, state) {
     const self = controller.appStateService;
     controller.appStateService.refreshAppState.apply(self, [

@@ -107,6 +107,7 @@ if (config.multiAccount?.enabled && intuneEnabled) {
 
 let userStatus = -1;
 let microphoneControlState = 'unknown';
+let keepAvailable = false;
 let mqttClient = null;
 let mqttMediaStatusService = null;
 let haDiscovery = null;
@@ -129,7 +130,8 @@ const notificationService = new NotificationService(
   player,
   config,
   mainAppWindow,
-  getUserStatus
+  getUserStatus,
+  (topic, payload, options) => mqttClient?.publishToTopic(topic, payload, options)
 );
 
 const screenSharingService = new ScreenSharingService();
@@ -512,7 +514,19 @@ function initializeMqtt() {
   async function handleMqttCommand(command) {
     const { action } = command;
 
-    if (action === 'get-calendar') {
+    if (action === 'set-keep-available') {
+      keepAvailable = command.enabled === true;
+      idleMonitor.setForceActive(keepAvailable);
+      await mqttClient.publishToTopic(config.mqtt.keepAvailableTopic || 'keep-available', keepAvailable ? 'ON' : 'OFF', { retain: true });
+    } else if (action === 'set-status') {
+      const window = mainAppWindow.getWindow();
+      if (window && !window.isDestroyed()) {
+        window.webContents.send('set-presence-status', command.status);
+        console.info(`[MQTT] Requested Teams presence status '${command.status}'`);
+      } else {
+        console.warn('[MQTT] Cannot set Teams presence status: window not available');
+      }
+    } else if (action === 'get-calendar') {
       await handleGetCalendarCommand(command);
     } else if (action === 'mute' || action === 'unmute') {
       const desiredState = action === 'mute' ? 'muted' : 'unmuted';
@@ -540,6 +554,11 @@ function initializeMqtt() {
   }
 
   mqttClient.on('command', handleMqttCommand);
+  mqttClient.on('connected', () => mqttClient.publishToTopic(
+    config.mqtt.keepAvailableTopic || 'keep-available',
+    keepAvailable ? 'ON' : 'OFF',
+    { retain: true }
+  ));
   mqttClient.initialize();
 
   mqttMediaStatusService = new MQTTMediaStatusService(mqttClient, config);
