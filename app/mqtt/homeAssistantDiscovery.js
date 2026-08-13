@@ -18,6 +18,8 @@
 const { getMediaTopics } = require('./mediaTopics');
 
 class HomeAssistantDiscovery {
+	static PRESENCE_OPTIONS = ['available', 'busy', 'do_not_disturb', 'away', 'be_right_back', 'offline'];
+
 	#mqttClient;
 	#mqttConfig;
 	#topicPrefix;
@@ -146,10 +148,14 @@ class HomeAssistantDiscovery {
 			name: 'Teams Set Status',
 			unique_id: `${this.#deviceId}_set_status`,
 			state_topic: `${this.#topicPrefix}/${this.#mqttConfig.statusTopic}`,
-			value_template: '{{ value_json.status }}',
+			// A select must only ever receive a value that is in `options`, and the
+			// status topic publishes 'unknown' before Teams reports a presence.
+			// Emitting nothing leaves the entity 'unknown' instead of logging
+			// "Invalid option received" on every restart.
+			value_template: `{% set s = value_json.status %}{{ s if s in ${JSON.stringify(HomeAssistantDiscovery.PRESENCE_OPTIONS)} else '' }}`,
 			command_topic: this.#commandTopic,
 			command_template: '{"action":"set-status","status":"{{ value }}"}',
-			options: ['available', 'busy', 'do_not_disturb', 'away', 'be_right_back'],
+			options: HomeAssistantDiscovery.PRESENCE_OPTIONS,
 			icon: 'mdi:account-switch',
 			availability: this.#getAvailability(),
 			device: this.#getDevice(),

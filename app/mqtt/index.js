@@ -18,7 +18,8 @@ class MQTTClient extends EventEmitter {
 			'2': 'busy',
 			'3': 'do_not_disturb',
 			'4': 'away',
-			'5': 'be_right_back'
+			'5': 'be_right_back',
+			'6': 'offline'
 		};
 
 		// Command handling configuration
@@ -31,7 +32,7 @@ class MQTTClient extends EventEmitter {
 		};
 
 		this.nonShortcutActions = ['get-calendar', 'set-keep-available', 'set-status'];
-		this.settableStatuses = new Set(['available', 'busy', 'do_not_disturb', 'away', 'be_right_back']);
+		this.settableStatuses = new Set(['available', 'busy', 'do_not_disturb', 'away', 'be_right_back', 'offline']);
 	}
 
 	get allowedActions() {

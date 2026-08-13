@@ -22,7 +22,7 @@ describe('Home Assistant status select discovery', () => {
 		const select = published.find(({topic}) => topic.endsWith('/select/test-client/set_status/config'));
 		assert.ok(select);
 		assert.deepStrictEqual(select.config.options, [
-			'available', 'busy', 'do_not_disturb', 'away', 'be_right_back'
+			'available', 'busy', 'do_not_disturb', 'away', 'be_right_back', 'offline'
 		]);
 		assert.strictEqual(select.config.command_topic, 'teams/command');
 		assert.match(select.config.command_template, /set-status/);

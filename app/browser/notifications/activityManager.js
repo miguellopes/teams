@@ -56,8 +56,16 @@ function setEventHandlers(self) {
   self.ipcRenderer.on("enable-wakelock", () => wakeLock.enable());
   self.ipcRenderer.on("disable-wakelock", () => wakeLock.disable());
 
-  self.ipcRenderer.on('set-presence-status', (_event, status) => {
-    activityHub.setPresenceStatus(status);
+  self.ipcRenderer.on('set-presence-status', async (_event, status) => {
+    let result;
+    try {
+      result = await activityHub.setPresenceStatus(status);
+    } catch (err) {
+      result = { ok: false, status, reason: `error:${err.message}` };
+    }
+    // Report back so the main process only republishes the presence it could
+    // actually apply, instead of leaving Home Assistant optimistically wrong.
+    self.ipcRenderer.send('presence-status-result', result);
   });
 
   self.ipcRenderer.on('incoming-call-action', (event, action) => {

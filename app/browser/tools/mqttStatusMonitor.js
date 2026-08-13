@@ -18,7 +18,8 @@
  * periodically as a fallback.
  *
  * Status Codes:
- * 1 = Available, 2 = Busy, 3 = Do Not Disturb, 4 = Away, 5 = Be Right Back
+ * 1 = Available, 2 = Busy, 3 = Do Not Disturb, 4 = Away, 5 = Be Right Back,
+ * 6 = Appear Offline
  */
 
 class MQTTStatusMonitor {
@@ -33,6 +34,9 @@ class MQTTStatusMonitor {
 
 		// Status keyword mapping for efficient lookup
 		this.statusKeywords = [
+			// 'appear offline' first: it is the most specific and must not be
+			// swallowed by a looser keyword below.
+			{ keywords: ['appear offline', 'appearoffline', 'appear-offline', 'presence-offline', 'status-offline'], code: 6 },
 			{ keywords: ['do not disturb', 'dnd', 'do-not-disturb', 'focus', 'presence-dnd', 'status-dnd'], code: 3 },
 			{ keywords: ['be right back', 'brb', 'berightback', 'presence-berightback', 'status-brb'], code: 5 },
 			{ keywords: ['busy', 'in a call', 'in a meeting', 'red', 'presence-busy', 'status-busy'], code: 2 },

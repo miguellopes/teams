@@ -67,7 +67,7 @@ describe('MQTT handleCommand - valid commands', () => {
 	});
 
 	it('emits set-status commands for supported presence values', () => {
-		for (const status of ['available', 'busy', 'do_not_disturb', 'away', 'be_right_back']) {
+		for (const status of ['available', 'busy', 'do_not_disturb', 'away', 'be_right_back', 'offline']) {
 			const emitted = fireAndCapture({ action: 'set-status', status });
 			assert.strictEqual(emitted.status, status);
 		}

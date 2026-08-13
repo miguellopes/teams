@@ -266,6 +266,7 @@ if (gotTheLock) {
 
   // Handle user status changes from Teams (e.g., Available, Busy, Away)
   ipcMain.handle("user-status-changed", userStatusChangedHandler);
+  ipcMain.on("presence-status-result", presenceStatusResultHandler);
   // Set application badge count (dock/taskbar notification)
   ipcMain.handle("set-badge-count", setBadgeCountHandler);
 
@@ -809,6 +810,22 @@ async function requestMediaAccess() {
     console.debug(
       `mac permission ${permission} asked current status ${status}`
     );
+  }
+}
+
+// The renderer reports whether the presence menu click actually landed. Only a
+// confirmed change is republished; a failure is logged so the Home Assistant
+// select does not sit on a value Teams never adopted.
+function presenceStatusResultHandler(_event, result) {
+  if (!result || typeof result !== "object") return;
+  if (result.ok) {
+    console.info(`[MQTT] Teams presence set to '${result.status}'`);
+  } else {
+    console.warn(
+      `[MQTT] Failed to set Teams presence to '${result.status}': ${result.reason || "unknown reason"}`,
+    );
+    // Re-publish the last known real status so HA snaps back.
+    mqttClient?.publishStatus(userStatus).catch(() => {});
   }
 }
 

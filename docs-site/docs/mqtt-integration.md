@@ -177,6 +177,7 @@ Status updates are published as JSON with the following structure:
 | `do_not_disturb` | `3` | Do Not Disturb / Presenting |
 | `away` | `4` | Away / Idle |
 | `be_right_back` | `5` | Be Right Back |
+| `offline` | `6` | Appear Offline |
 
 ## MQTT Commands
 
@@ -203,7 +204,7 @@ Send commands as JSON messages to the command topic (`teams/command` by default)
 | `unmute` | Ctrl+Shift+M | Unmute the microphone (state-aware, see below) |
 | `toggle-video` | Ctrl+Shift+O | Toggle video on/off |
 | `toggle-hand-raise` | Ctrl+Shift+K | Toggle hand raise in meeting |
-| `set-status` | — | Set presence; requires a `status` value of `available`, `busy`, `do_not_disturb`, `away`, or `be_right_back` |
+| `set-status` | — | Set presence; requires a `status` value of `available`, `busy`, `do_not_disturb`, `away`, `be_right_back`, or `offline` |
 
 ### State-Aware Mute and Unmute
 
