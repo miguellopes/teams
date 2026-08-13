@@ -133,8 +133,12 @@ class HomeAssistantDiscovery {
 	}
 
 	#buildNotificationSensorConfig() {
-		if (!this.#mqttConfig.notificationTopic) return null;
-		const topic = `${this.#topicPrefix}/${this.#mqttConfig.notificationTopic}`;
+		// yargs does not deep-merge object defaults, so a partial user `mqtt`
+		// config leaves notificationTopic undefined; fall back to the default.
+		// An explicit empty string still disables the sensor, so use `??`.
+		const notificationTopic = this.#mqttConfig.notificationTopic ?? 'notification';
+		if (!notificationTopic) return null;
+		const topic = `${this.#topicPrefix}/${notificationTopic}`;
 		return {
 			name: 'Teams Last Notification', unique_id: `${this.#deviceId}_last_notification`,
 			state_topic: topic, value_template: '{{ value_json.title }}', json_attributes_topic: topic,

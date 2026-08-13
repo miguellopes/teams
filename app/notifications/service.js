@@ -136,8 +136,14 @@ class NotificationService {
   }
 
   async #playNotificationSound(options) {
-    if (this.#mqttPublisher && this.#config.mqtt?.notificationTopic) {
-      await this.#mqttPublisher(this.#config.mqtt.notificationTopic, {
+    // yargs does not deep-merge object defaults, so a user config with a
+    // partial `mqtt` block (e.g. configured before notificationTopic existed)
+    // leaves notificationTopic undefined. Fall back to the default topic; an
+    // explicit empty string still disables publishing ("leave empty to
+    // disable"), so use `??` rather than `||`.
+    const notificationTopic = this.#config.mqtt?.notificationTopic ?? 'notification';
+    if (this.#mqttPublisher && notificationTopic) {
+      await this.#mqttPublisher(notificationTopic, {
         title: options.title || '', body: options.body || '', timestamp: new Date().toISOString()
       }, { retain: false });
     }
