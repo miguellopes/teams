@@ -969,7 +969,7 @@ module.exports = {
             verifyMethod: "",
           },
           keepMsalCacheEncryptionCookie: {
-            enabled: false,
+            enabled: true,
             days: 400
           }
         },
@@ -1031,7 +1031,7 @@ module.exports = {
           },
           "keepMsalCacheEncryptionCookie.enabled": {
             type: "boolean",
-            describe: "Sets an expiration date for the 'msal.cache.encryption' cookie to keep it after restarts (issue #2681); off by default"
+            describe: "Sets an expiration date for the 'msal.cache.encryption' cookie to keep it after restarts (issue #2681); on by default. Set to false to keep the cookie session-scoped, at the cost of signing in again after every restart"
           },
           "keepMsalCacheEncryptionCookie.days": {
             type: "number",
