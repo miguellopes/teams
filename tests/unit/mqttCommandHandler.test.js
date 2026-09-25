@@ -139,7 +139,7 @@ describe('MQTT handleCommand - invalid commands', () => {
 	});
 
 	it('rejects invalid or missing set-status values', () => {
-		assert.strictEqual(fireAndCapture({ action: 'set-status', status: 'offline' }), null);
+		assert.strictEqual(fireAndCapture({ action: 'set-status', status: 'not-a-status' }), null);
 		assert.strictEqual(fireAndCapture({ action: 'set-status' }), null);
 		assert.strictEqual(fireAndCapture({ action: 'set-status', status: 1 }), null);
 	});
